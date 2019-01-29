@@ -1,0 +1,19 @@
+entity Author{
+	name : String
+	books -> Set<Book>(dominatedBy = "Book.authors")
+}
+
+page cao{}
+
+entity Book{
+	name : String
+	authors -> Author
+}
+
+//page caonima{}
+
+
+
+//entity Author{
+//	name : String
+//}

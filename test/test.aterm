@@ -1,0 +1,19 @@
+Modules(
+  [ Entity(
+      "Author"
+    , [ Property(MemberAttr("name", Type("String")), None())
+      , Property(
+          ReferAttr("books", SetType("Book"))
+        , Some(Annotation([DominatedBy("Book", "authors")]))
+        )
+      ]
+    )
+  , Page("cao")
+  , Entity(
+      "Book"
+    , [ Property(MemberAttr("name", Type("String")), None())
+      , Property(ReferAttr("authors", Type("Author")), None())
+      ]
+    )
+  ]
+)

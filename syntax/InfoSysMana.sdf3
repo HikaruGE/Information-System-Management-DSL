@@ -1,0 +1,25 @@
+module InfoSysMana
+
+imports
+  
+  Common
+  EntityDecl
+  PageDecl
+
+context-free start-symbols
+  
+  Start
+
+context-free syntax
+  
+  Start.Empty = <>
+  Start.Modules = <<Module+>>
+  
+sorts
+
+  Module
+  
+context-free syntax
+  
+  Module = Entity
+  Module = Page

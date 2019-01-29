@@ -1,0 +1,39 @@
+module infosysmana
+
+imports
+  
+  completion/completion
+  pp
+  outline
+  analysis
+  signatures/-
+  gernerate/-
+
+rules // Debugging
+  
+  debug-show-aterm:
+    (node, _, _, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"aterm")> path
+    ; result   := node
+
+rules
+
+	test-1:
+	(selected, position, ast, path, project-path) -> (filename, result)
+	with
+		entityLst := <collect-all(find-entity)>selected;
+		entityTuple@(entityFilenameLst,entityResultLst) := <generate-entity-file>entityLst;
+		filename2 := <pagepath>;
+		filename := <conc>(entityFilenameLst,filename2);
+		result2 := <collect-all(find-page)>selected;
+		result := <conc>(entityResultLst,result2)
+	
+	find-entity =
+		?Entity(_,_)
+	
+	find-page =
+		?Page(_)
+		
+	pagepath = 
+		!["test/output-pages.aterm"]

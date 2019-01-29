@@ -1,0 +1,20 @@
+module Main
+
+imports
+
+  Syntax
+  Analysis
+
+language
+
+  extensions : ism
+
+  provider : target/metaborg/stratego.ctree
+  provider : target/metaborg/stratego-javastrat.jar
+
+
+menus
+
+  menu: "Generation"                   (openeditor) (realtime)
+    
+    action: "test-1"          = test-1

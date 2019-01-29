@@ -1,0 +1,42 @@
+module EntityDecl
+
+imports 
+	Common
+	Lexical
+
+//context-free syntax
+//  	Start = Entity
+  
+sorts
+	Entity
+	Property
+	
+context-free syntax
+//	Entity.Models = <<Entity*>>
+	Entity.Entity = <entity<ID>{<Property*>}>
+	Property.Property = <<PropDecl><Annotation?>>
+
+sorts
+	PropDecl
+	
+context-free syntax
+	PropDecl.MemberAttr = <<ID>:<Type>>
+	PropDecl.ReferAttr = <<ID> -\> <Type>>
+
+sorts
+	Annotation
+	AnnoExpr	
+	
+context-free syntax
+	Annotation.Annotation = <(<{AnnoExpr ","}+>)>
+	AnnoExpr.DominatedBy = <dominatedBy = "<ID>.<ID>">
+	AnnoExpr.Searchable = <searchable>
+
+sorts Type
+
+context-free syntax
+
+	Type.Type = <<ID>>
+	Type.ListType = <List \<<ID>\>>
+	Type.SetType = <Set \<<ID>\>>
+	

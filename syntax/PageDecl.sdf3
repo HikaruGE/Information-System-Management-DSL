@@ -1,0 +1,14 @@
+module PageDecl
+
+imports
+  
+  Common
+  Lexical
+
+sorts
+  
+  Page
+
+context-free syntax
+  
+  Page.Page = <page<ID>{}>

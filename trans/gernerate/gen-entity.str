@@ -1,0 +1,188 @@
+module gen-entity
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	
+rules
+	
+	generate-entity-file:
+		entityLst@[entity*] -> (filenameLst,resultLst)
+		with
+			filenameLst := <get-entity-filenameLst>entityLst;
+			resultLst := <map(entity-to-class(|entityLst))>entityLst
+	
+rules
+
+	get-entity-name:
+		Entity(className,_) -> className
+	
+	get-props:
+		Entity(_,props) -> props
+	
+	get-entity-filenameLst:
+		entityLst -> filenameLst
+		with
+		entityNameLst := <map(get-entity-name)> entityLst;
+		targetPathLst:= <map(\x-><conc-strings>("spring-boot/entity/",x)\)>entityNameLst;
+		filenameLst := <map(guarantee-extension(|"java"))> targetPathLst
+		
+rules //class body
+
+	entity-to-class(|entityLst):
+	Entity(className,prop*)->
+	$[package entity;
+	  
+	  import javax.persistence.*;
+	  [import*]
+	  
+	  @Entity
+	  public class [className]{
+	  
+	  	@Id
+	  	@GeneratedValue
+    	private Long id;
+    	public Long getId() {return id;}
+    	public void setId(Long id) {this.id = id;}
+    	
+    	public [className](){ }
+	  	[prop'*]
+	  	}]
+	with
+		prop'* := <map(prop-get-set(|entityLst,className))>prop*;
+		import* := "//import others, todo" // todo
+
+rules //each property
+	
+	//inner attribute
+	prop-get-set(|entityLst,className):
+	Property(attr@MemberAttr(propName,type),_)-> 
+	$[
+	@Column
+	private [type'] [propName];
+	public [type'] get[propName'](){return [propName];}
+	public void set[propName'](){this.[propName] = [propName];}
+	]
+	with
+		propName' := <capitalizing-word>propName;
+		type' := <builtin-java-type> type
+	
+	//reference attribute
+	prop-get-set(|entityLst,className):
+	prop@Property(attr@ReferAttr(propName,type),_)->
+	$[
+	[relation]
+	private [type'] [propName][newSet];
+	public [type'] get[propName'](){return [propName];}
+	public void set[propName'](){this.[propName] = [propName];}
+	]
+	with
+		propName' := <capitalizing-word>propName;
+    	type' := <declared-java-type> type;
+    	newSet := <get-new-set>type;
+    	relation := <get-relation(|entityLst,className)>prop
+    		
+rules
+	
+	builtin-java-type:
+		Type("String") -> $[String]
+	
+	builtin-java-type:
+		Type("int") -> $[int]
+	
+	declared-java-type:
+    	Type(x_Class) -> $[[x_Class]]
+    
+    declared-java-type:
+    	SetType(x_Class) -> $[Set<[x_Class]>]
+    
+    get-new-set:
+    	SetType(x_Class) -> $[ = new HashSet<>()]
+    
+    get-new-set:
+    	Type(x_Class) -> $[]
+    
+rules
+
+	capitalizing-word:
+	ID -> capID
+	with
+		charLst@[x|xs] := <explode-string>ID;
+		capFirstChar := <to-upper>x;
+		capID := <implode-string>[capFirstChar|xs]
+		
+	is-string-equal(|x,y) =
+		<strcmp>(<explode-string>x,<explode-string>y)
+		
+rules
+
+	get-relation(|entityLst,className):
+	prop@Property(ReferAttr(propName, type), annoLst) -> $[@[lhs]To[rhs](fetch = FetchType.EAGER[mappedBy])]
+	with
+		lhs := <test-if(|entityLst,className)>annoLst;
+		rhs := <get-relation-by-type>type;
+		mappedBy := ""
+	
+	get-relation-by-type:
+		Type(_) -> $[One]
+	
+	get-relation-by-type:
+		SetType(_) -> $[Many]
+	
+rules 	
+	
+	test-if(|entityLst,anno) = 
+	if get-dominatedBy-from-annolst
+		then get-dominatedBy-from-annolst;get-owner-quantity(|entityLst)
+		else write-to-string
+	end
+	
+	get-dominatedBy-from-annolst:
+	Some(Annotation(annoLst)) -> anno
+	with
+		anno := <fetch-elem(?DominatedBy(_,_))>annoLst
+	
+	get-owner-quantity(|entityLst):
+	domination@DominatedBy(className,attrName) -> relation
+	with
+		owner-entity-after-filter := <map(entity-filter-by-className(|className))>entityLst;
+		owner-entity:= <fetch-elem(?Entity(_,_))>owner-entity-after-filter;
+		owner-props := <get-props>owner-entity;
+		owner-props-after-filter := <map(prop-filter-by-referAttrName(|attrName))>owner-props;
+		owner-prop := <fetch-elem(?Property(_,_))>;
+		relation := <get-relation-by-type><get-referAttr-type>owner-prop
+		
+		
+	get-referAttr-type:
+		Property(ReferAttr(_, type),_) -> type
+	
+	//<write-to-string>
+	
+	entity-filter-by-className(|className):
+	ent@Entity(name,_) -> result
+	with
+		stringResult := <is-string-equal(|name,className)>;
+		result := <check-equal(|stringResult)>ent
+	
+	int-eq-0 = ?0
+	
+	check-equal(|stringResult) = 
+		if <int-eq-0>stringResult
+			then id
+			else !None()
+		end
+	
+	prop-filter-by-referAttrName(|attrName):
+		prop@Property(MemberAttr(_,_),_) -> None()
+		
+	prop-filter-by-referAttrName(|attrName):
+	prop@Property(ReferAttr(name, type),_) -> result
+	with
+		stringResult := <is-string-equal(|name,attrName)>;
+		result := <check-equal(|stringResult)>prop
+	
+	
