@@ -123,9 +123,9 @@ rules
 	get-relation(|entityLst,className):
 	prop@Property(ReferAttr(propName, type), annoLst) -> $[@[lhs]To[rhs](fetch = FetchType.EAGER[mappedBy])]
 	with
-		lhs := <test-if(|entityLst,className)>annoLst;
+		lhs := <get-lhs-relation(|entityLst,className,type,className,propName)>annoLst;
 		rhs := <get-relation-by-type>type;
-		mappedBy := ""
+		mappedBy := <get-mappedBy>annoLst
 	
 	get-relation-by-type:
 		Type(_) -> $[One]
@@ -135,11 +135,20 @@ rules
 	
 rules 	
 	
-	test-if(|entityLst,anno) = 
+	get-lhs-relation(|entityLst,anno,type,className,propName) = 
 	if get-dominatedBy-from-annolst
-		then get-dominatedBy-from-annolst;get-owner-quantity(|entityLst)
-		else write-to-string
+		then get-dominatedBy-from-annolst;get-owner-quantity(|entityLst) // has dominatedBy
+		else get-inverse-relation(|entityLst,type,className,propName) //no dominatedBy, need to find in other eneities
 	end
+	
+	get-mappedBy =
+	if get-dominatedBy-from-annolst
+		then get-dominatedBy-from-annolst;generate-mappedBy
+		else !$[]
+	end
+	
+	generate-mappedBy:
+		DominatedBy(className,attrName) -> $[,mappedBy="[attrName]"]
 	
 	get-dominatedBy-from-annolst:
 	Some(Annotation(annoLst)) -> anno
@@ -185,4 +194,51 @@ rules
 		stringResult := <is-string-equal(|name,attrName)>;
 		result := <check-equal(|stringResult)>prop
 	
+	get-inverse-relation(|entityLst,type,className,propName):
+		None() -> result
+	with
+		classNameInType := <get-className-from-Type>type;
+		owner-entity-after-filter := <map(entity-filter-by-className(|classNameInType))>entityLst;
+		owner-entity:= <fetch-elem(?Entity(_,_))>owner-entity-after-filter;
+		owner-props := <get-props>owner-entity;
+		owner-props-filtered := <map(prop-filter-by-dominatededBy(|className,propName))>owner-props;
+		result := <get-relation-search-ch>owner-props-filtered
+		
 	
+	prop-filter-by-dominatededBy(|className,attrName):
+		Property(_, None()) -> None()
+	prop-filter-by-dominatededBy(|className,attrName):
+		Property(MemberAttr(_, _),_) -> None()
+	prop-filter-by-dominatededBy(|className,attrName):
+		prop@Property(ReferAttr(z, type), Some(Annotation(annoLst))) -> result
+	with
+		result := <check-domination(|className,attrName,prop)>annoLst
+		
+		
+	check-domination(|className,attrName,prop) =
+		if fetch-elem(?DominatedBy(_,_))
+			then fetch-elem(?DominatedBy(_,_));is-domination-eq(|className,attrName)< <id>prop + !None()
+			else !None()
+		end
+	
+	get-className-from-Type:
+		Type(x) -> x
+	get-className-from-Type:
+		SetType(x) -> x
+	
+	is-domination-eq(|x1,y1):
+		dom@DominatedBy(x2,y2) -> dom
+	with
+		stringResultX := <is-string-equal(|x1,x2)>;
+		resultX := <check-equal(|stringResultX)>dom;
+		stringResultY := <is-string-equal(|y1,y2)>;
+		resultY := <check-equal(|stringResultX)>dom
+	
+	get-relation-search-ch =
+		if fetch-elem(?Property(_,_))
+			then fetch-elem(?Property(_,_));get-referAttr-type;get-relation-by-type
+			else !$[Many]
+		end
+		
+		
+		

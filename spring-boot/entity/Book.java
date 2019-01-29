@@ -19,9 +19,9 @@ public class Book{
 	public String getName(){return name;}
 	public void setName(){this.name = name;}
 	
-	@None{TermIndex("test/test.ism",39)}ToOne(fetch = FetchType.EAGER)
-	private Author authors;
-	public Author getAuthors(){return authors;}
+	@ManyToMany(fetch = FetchType.EAGER,mappedBy="books")
+	private Set<Author> authors= new HashSet<>();
+	public Set<Author> getAuthors(){return authors;}
 	public void setAuthors(){this.authors = authors;}
 	
 	}

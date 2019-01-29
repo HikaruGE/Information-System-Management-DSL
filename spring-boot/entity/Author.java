@@ -19,9 +19,14 @@ public class Author{
 	public String getName(){return name;}
 	public void setName(){this.name = name;}
 	
-	@OneToMany(fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Book> books= new HashSet<>();
 	public Set<Book> getBooks(){return books;}
 	public void setBooks(){this.books = books;}
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	private Xxx xx;
+	public Xxx getXx(){return xx;}
+	public void setXx(){this.xx = xx;}
 	
 	}
