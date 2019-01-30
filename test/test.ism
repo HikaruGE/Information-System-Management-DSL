@@ -1,19 +1,30 @@
 entity Author{
-	name : String
-	books -> Set<Book>
-	xx -> Xxx
+	name : String(searchable)
+	books -> Set<Book>(searchable)
 }
-
-page cao{}
 
 entity Book{
 	name : String
+	tittle : String
+	description : String
 	authors -> Set<Author>(dominatedBy = "Author.books")
+//	borrower -> User
 }
 
-entity Xxx{}
+//entity User{
+//	username : String
+//	password : String
+//	email : String
+//	phone : String
+//	borrowedBooks -> Set<Book>
+//	roles -> Set<Role>
+//}
+//
+//entity Role{
+//	name : String
+//}
 
-//page caonima{}
+page caonima{}
 
 
 

@@ -24,9 +24,4 @@ public class Author{
 	public Set<Book> getBooks(){return books;}
 	public void setBooks(){this.books = books;}
 	
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Xxx xx;
-	public Xxx getXx(){return xx;}
-	public void setXx(){this.xx = xx;}
-	
 	}

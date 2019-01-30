@@ -150,10 +150,19 @@ rules
 	generate-mappedBy:
 		DominatedBy(className,attrName) -> $[,mappedBy="[attrName]"]
 	
-	get-dominatedBy-from-annolst:
-	Some(Annotation(annoLst)) -> anno
-	with
-		anno := <fetch-elem(?DominatedBy(_,_))>annoLst
+//	get-dominatedBy-from-annolst:
+//	Some(Annotation(annoLst)) -> anno
+//	with
+//		anno := <fetch-elem(?DominatedBy(_,_))>annoLst
+	
+	get-dominatedBy-from-annolst =
+		get-annos-from-some;fetch-elem(?DominatedBy(_,_))
+		
+	get-annos-from-some:
+		Some(Annotation(annoLst)) -> annoLst
+	
+//	is-dominatedBy-in-annolst =
+//		fetch-elem(?DominatedBy(_,_))
 	
 	get-owner-quantity(|entityLst):
 	domination@DominatedBy(className,attrName) -> relation
@@ -195,7 +204,7 @@ rules
 		result := <check-equal(|stringResult)>prop
 	
 	get-inverse-relation(|entityLst,type,className,propName):
-		None() -> result
+		_ -> result
 	with
 		classNameInType := <get-className-from-Type>type;
 		owner-entity-after-filter := <map(entity-filter-by-className(|classNameInType))>entityLst;

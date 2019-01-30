@@ -19,6 +19,16 @@ public class Book{
 	public String getName(){return name;}
 	public void setName(){this.name = name;}
 	
+	@Column
+	private String tittle;
+	public String getTittle(){return tittle;}
+	public void setTittle(){this.tittle = tittle;}
+	
+	@Column
+	private String description;
+	public String getDescription(){return description;}
+	public void setDescription(){this.description = description;}
+	
 	@ManyToMany(fetch = FetchType.EAGER,mappedBy="books")
 	private Set<Author> authors= new HashSet<>();
 	public Set<Author> getAuthors(){return authors;}

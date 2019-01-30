@@ -1,19 +1,27 @@
 Modules(
   [ Entity(
       "Author"
-    , [ Property(MemberAttr("name", Type("String")), None())
+    , [ Property(
+          MemberAttr("name", Type("String"))
+        , Some(Annotation([Searchable()]))
+        )
       , Property(
           ReferAttr("books", SetType("Book"))
-        , Some(Annotation([DominatedBy("Book", "authors")]))
+        , Some(Annotation([Searchable()]))
         )
       ]
     )
-  , Page("cao")
   , Entity(
       "Book"
     , [ Property(MemberAttr("name", Type("String")), None())
-      , Property(ReferAttr("authors", Type("Author")), None())
+      , Property(MemberAttr("tittle", Type("String")), None())
+      , Property(MemberAttr("description", Type("String")), None())
+      , Property(
+          ReferAttr("authors", SetType("Author"))
+        , Some(Annotation([DominatedBy("Author", "books")]))
+        )
       ]
     )
+  , Page("caonima")
   ]
 )
