@@ -12,7 +12,7 @@ context-free start-symbols
 
 context-free syntax
   
-  Start.Empty = <>
+//  Start.Empty = <>
   Start.Modules = <<Module+>>
   
 sorts
@@ -22,4 +22,4 @@ sorts
 context-free syntax
   
   Module = Entity
-  Module = Page
+  Module = Dispatcher

@@ -4,7 +4,7 @@ import javax.persistence.*;
 //import others, todo
 
 @Entity
-public class Author{
+public class Student{
 
 	@Id
 	@GeneratedValue
@@ -12,16 +12,16 @@ public class Author{
 	public Long getId() {return id;}
 	public void setId(Long id) {this.id = id;}
 	
-	public Author(){ }
+	public Student(){ }
 	
 	@Column
 	private String name;
 	public String getName(){return name;}
-	public void setName(){this.name = name;}
+	public void setName(String name){this.name = name;}
 	
-	@ManyToMany(fetch = FetchType.EAGER)
-	private Set<Book> books= new HashSet<>();
-	public Set<Book> getBooks(){return books;}
-	public void setBooks(){this.books = books;}
+	@Column
+	private String phone;
+	public String getPhone(){return phone;}
+	public void setPhone(String phone){this.phone = phone;}
 	
 	}

@@ -1,0 +1,131 @@
+module gen-service-dao
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	gernerate/-
+	
+rules
+
+	generate-ser-dao:
+		entityLst -> (filenameLst,resultLst)
+		with
+			(serviceFilenameLst,serviceResultLst) := <generate-ser-impl>entityLst;
+			(IserviceFilenameLst,IserviceResultLst) := <generate-ser-inter>entityLst;
+			(daoFilenameLst,daoResultLst) := <generate-dao>entityLst;
+			filenameLst := <concat>[serviceFilenameLst,IserviceFilenameLst,daoFilenameLst];
+			resultLst := <concat>[serviceResultLst,IserviceResultLst,daoResultLst]
+	
+	generate-ser-impl:
+		entityLst@[entity*] -> (filenameLst,resultLst)
+		with
+			entityNameLst := <map(get-entity-name)>entityLst;
+			targetPathLst:= <map(\x-><concat-strings>["spring-boot/src/service/",x,"ServiceImpl"]\)>entityNameLst;
+			filenameLst := <map(guarantee-extension(|"java"))> targetPathLst;
+			resultLst := <map(entity-to-ser-impl)>entityLst
+		
+	generate-ser-inter:
+		entityLst@[entity*] -> (filenameLst,resultLst)
+		with
+			entityNameLst := <map(get-entity-name)> entityLst;
+			targetPathLst:= <map(\x-><concat-strings>["spring-boot/src/service/I",x,"Service"]\)>entityNameLst;
+			filenameLst := <map(guarantee-extension(|"java"))> targetPathLst;
+			resultLst := <map(entity-to-ser-inter)>entityLst
+	
+	generate-dao:
+		entityLst@[entity*] -> (filenameLst,resultLst)
+		with
+			entityNameLst := <map(get-entity-name)> entityLst;
+			targetPathLst:= <map(\x-><concat-strings>["spring-boot/src/dao/",x,"Dao"]\)>entityNameLst;
+			filenameLst := <map(guarantee-extension(|"java"))> targetPathLst;
+			resultLst := <map(entity-to-dao)>entityLst
+		
+rules
+
+	entity-to-ser-inter:
+		Entity(name,prop*) -> 
+		$[package service;
+		import entity.[name];
+		
+		import java.util.List;
+		
+		public interface I[name]Service {
+			
+			List<[name]> getAll();
+			void save([name] obj);
+			void delete(Long id);
+			[name] getById(Long id);
+			
+			[prop'*]
+		}
+		]
+		with
+			prop'* := ""
+		
+	entity-to-ser-impl:
+		Entity(name,prop*) -> 
+		$[package service;
+		import dao.[name]Dao;
+		import entity.[name];
+		import org.springframework.beans.factory.annotation.Autowired;
+		import org.springframework.stereotype.Service;
+		
+		import java.util.List;
+		
+		@Service
+		public class [name]ServiceImpl implements I[name]Service {
+		
+			@Autowired
+			[name]Dao [<lower-word>name]Dao;
+			
+			@Override
+			public List<[name]> getAll(){
+				return [<lower-word>name]Dao.findAll();
+			}
+			
+			@Override
+			public void save([name] obj){
+				[<lower-word>name]Dao.save(obj);
+			}
+			
+			@Override
+			public void delete(Long id){
+				[<lower-word>name]Dao.deleteById(id);
+			}
+			
+			@Override
+			public [name] getById(Long id){
+				return [<lower-word>name]Dao.find[name]ById(id);
+			}
+			
+			[prop'*]
+		}
+		]
+		with
+			prop'* := ""
+		
+	entity-to-dao:
+		Entity(name,prop*) -> 
+		$[package dao;
+		
+		import entity.[name];
+		import org.springframework.data.jpa.repository.JpaRepository;
+		import org.springframework.stereotype.Repository;
+		
+		import java.util.List;
+		
+		@Repository
+		public interface [name]Dao extends JpaRepository<[name],Long> {
+			
+			Student find[name]ById(Long id);
+			List<[name]> findAll();
+		
+			[prop'*]
+		}]
+		with
+			prop'* := ""
+	

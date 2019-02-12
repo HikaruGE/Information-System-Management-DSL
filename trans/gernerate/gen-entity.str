@@ -28,7 +28,7 @@ rules
 		entityLst -> filenameLst
 		with
 		entityNameLst := <map(get-entity-name)> entityLst;
-		targetPathLst:= <map(\x-><conc-strings>("spring-boot/entity/",x)\)>entityNameLst;
+		targetPathLst:= <map(\x-><conc-strings>("spring-boot/src/entity/",x)\)>entityNameLst;
 		filenameLst := <map(guarantee-extension(|"java"))> targetPathLst
 		
 rules //class body
@@ -38,7 +38,6 @@ rules //class body
 	$[package entity;
 	  
 	  import javax.persistence.*;
-	  [import*]
 	  
 	  @Entity
 	  public class [className]{
@@ -53,8 +52,7 @@ rules //class body
 	  	[prop'*]
 	  	}]
 	with
-		prop'* := <map(prop-get-set(|entityLst,className))>prop*;
-		import* := "//import others, todo" // todo
+		prop'* := <map(prop-get-set(|entityLst,className))>prop*
 
 rules //each property
 	
@@ -65,7 +63,7 @@ rules //each property
 	@Column
 	private [type'] [propName];
 	public [type'] get[propName'](){return [propName];}
-	public void set[propName'](){this.[propName] = [propName];}
+	public void set[propName']([type'] [propName]){this.[propName] = [propName];}
 	]
 	with
 		propName' := <capitalizing-word>propName;

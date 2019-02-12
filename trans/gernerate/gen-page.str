@@ -1,0 +1,196 @@
+module gen-page
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	gernerate/-
+	
+rules
+
+	generate-html-file:
+		dispatcherLst@[dispa*] -> (filenameLst,resultLst)
+		with
+			filenameLst := <mapconcat(get-html-filenameLst)>dispatcherLst;
+			resultLst := <mapconcat(dispatcher-to-html)>dispatcherLst
+	
+	get-html-filenameLst:
+		Dispatcher(name,component*) -> filenameLst
+		with
+			page* := <collect-all(?Page(_,_,_,_,_))>component*;
+			pageName* := <map(get-page-name)>page*;
+			targetPathLst:= <map(\x-><concat-strings>["spring-boot/resources/templates/",name,"/",x]\)>;
+			filenameLst := <map(guarantee-extension(|"html"))> targetPathLst
+		
+	get-page-name:
+		Page(_,name,_,_,_) -> name
+	
+rules
+
+	dispatcher-to-html:
+		Dispatcher(name,component*) -> pagecode*
+		with
+		page* := <collect-all(?Page(_,_,_,_,_))>component*;
+		pagecode* := <map(page-to-html)>page*
+
+	page-to-html:
+		page@Page(_,name,_,_,Body(elems)) -> 
+	$[<!DOCTYPE html>
+	<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+	<head>
+		<meta charset="UTF-8">
+		<title>[name]</title>
+	</head>
+	
+	<body>
+		[elems']
+	</body>
+	
+	</html>]
+	with
+		elems' := <map(page-elem)>elems
+		
+	page-elem:
+		Table(row*) ->
+		$[<table border="1">[row'*]
+		</table>]
+	with
+		row'* :=  <map(page-elem)>row*
+		
+	page-elem:
+		Row(col*)->
+		$[
+		<tr>[col'*]
+		</tr>]
+	with
+		col'* := <map(page-elem)>col*
+		
+	page-elem:
+		Col(cloitem*)->
+		$[
+		<td>[cloitem'*]</td>]
+	with
+		cloitem'* := <map(page-elem)>cloitem*
+		
+	page-elem:
+		Output(String(str))->$[[str']]
+	with
+		str' := <un-double-quote>str
+		
+	page-elem:
+		Output(entityAttr) -> $[<span th:text="${[entityAttr']}"></span>]
+	with
+		entityAttr' := <get-entity-obj>entityAttr
+	
+	page-elem:
+		Form(method,elem*) ->
+		$[<form [methodAndAction]>
+			[hiden-id]
+			[elem'*]
+		</form>
+		]
+	with
+		elem'* := <map(page-elem)>elem*;
+		methodAndAction := <get-method-action>method;
+		hiden-id := <id-by-method>method
+		
+	id-by-method =
+		if ?Put(x) 
+			then !$[<input type="hidden" name="id" th:value="${[<lower-word>x].id}">]	
+			else !$[]
+		end
+		
+	get-method-action:
+		Post(x) -> $[th:method="POST" th:action="@{/[<lower-word>x]}"]
+		
+	get-method-action:
+		Put(x) -> $[th:method="PUT" th:action="@{/[<lower-word>x]}"]
+	
+	page-elem:
+		Input(entity@EntityAttr(entityAttr)) -> $[<input name="[entityAttr']" type="text" [preInput]/>]
+	with
+		entityAttr' := <last>entityAttr;
+		preInput := <is-preInput(|entityAttr)>entity
+//		preInput' := $[th:value="${[preInput]}"]
+	
+	is-preInput(|entityAttr) =
+		if <gt>(<length>entityAttr,1)
+			then get-entity-obj;gen-preInput
+			else ![]
+		end
+		
+	gen-preInput:
+		x -> $[th:value="${[x]}"]
+	
+	page-elem:
+		Foreach(each,type,listobj,elem*)->
+		$[
+		<div th:each="[each]:${[listobj']}">
+			[elem'*]
+		</div>"]
+	with
+		listobj' := <concat-strings><get-entity-obj>listobj;
+//		elem'* := <map(write-to-string)>elem*
+		elem'* := <map(page-elem)>elem*
+		
+	page-elem:
+		List(li*) -> 
+		$[
+		<ul>[li'*]
+		</ul>
+		]
+	with	
+		li'* := <map(page-elem)>li*
+	
+	page-elem:
+		ListItem(x) ->
+		$[<li>[x']</li>]
+	with
+		x' := <page-elem>x
+	
+	get-entity-obj:
+		EntityAttr([obj|[]]) -> <concat>([obj])
+		
+	get-entity-obj:
+		EntityAttr([obj|objs]) -> <concat>[[obj],objs']
+	with
+		objs' := <map(add-dot-before-string)>objs
+	
+	add-dot-before-string:
+		x -> x'
+	with
+		x' := <conc-strings>(".",x)
+	
+	page-elem:
+		GotoEdit(var, entity) -> $[<a th:href="@{/[<lower-word>entity]/}+${[var].id}">Edit</a>
+		]
+	page-elem:
+		GotoCreate(entity) -> $[<a th:href="@{/[<lower-word>entity]}">Create</a>
+		]
+			
+	page-elem:
+		Delete(var, entity) -> 
+		$[<form th:method="DELETE" th:action="@{/[<lower-word>entity]/}+${[var].id}">
+			<button type="submit" >Delete</button>
+		</form>]
+		
+	
+	page-elem:
+		Submit() -> $[<button type="submit" value="Submit">Submit</button>]
+		
+	page-elem:
+		Edit() -> $[<button type="submit" value="Edit">Edit</button>]
+		
+	page-elem:
+		Create() -> $[<button type="submit" value="Create">Create</button>]
+	
+	page-elem:
+		Reset() -> $[<input type="reset" value="Reset">]
+		
+		
+		
+		
+		

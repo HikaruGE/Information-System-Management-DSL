@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>add</title>
+</head>
+
+<body>
+	<form th:method="POST" th:action="@{/student}">
+		
+		<table border="1">
+		                  <tr>
+		                      <td>name</td>
+		                      <td><input name="name" type="text" /></td>
+		                  </tr>
+		                  <tr>
+		                      <td>phone</td>
+		                      <td><input name="phone" type="text" /></td>
+		                  </tr>
+		                  <tr>
+		                      <td><button type="submit" value="Create">Create</button></td>
+		                      <td><input type="reset" value="Reset"></td>
+		                  </tr>
+		</table>
+	</form>
+	
+</body>
+
+</html>

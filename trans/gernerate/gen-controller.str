@@ -1,0 +1,211 @@
+module gen-controller
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	gernerate/-
+	
+rules
+
+	generate-controller-file:
+		dispatcherLst@[dispa*] -> (filenameLst,resultLst)
+		with
+			filenameLst := <get-controller-filenameLst>dispatcherLst;
+			resultLst := <map(dispatcher-to-controller)>dispatcherLst
+	
+rules
+
+	get-controller-filenameLst:
+		dispatcherLst -> filenameLst
+		with
+		controllerNameLst := <map(get-controller-name)>dispatcherLst;
+		targetPathLst:= <map(\x-><conc-strings>("spring-boot/src/controller/",x)\)>controllerNameLst;
+		filenameLst := <map(guarantee-extension(|"java"))> targetPathLst
+		
+	get-controller-name:
+		Dispatcher(name,_) -> name'
+		with
+		name' := <conc-strings>(<capitalizing-word>name,"Controller")
+	
+	capitalizing-word:
+	ID -> capID
+	with
+		charLst@[x|xs] := <explode-string>ID;
+		capFirstChar := <to-upper>x;
+		capID := <implode-string>[capFirstChar|xs]
+		
+	lower-word:
+	ID -> lowID
+	with
+		charLst@[x|xs] := <explode-string>ID;
+		lowFirstChar := <to-lower>x;
+		lowID := <implode-string>[lowFirstChar|xs]
+	
+rules
+	
+	dispatcher-to-controller:
+		Dispatcher(name,controller*) -> 
+		$[package controller;
+		
+		import service.*;
+		import entity.*;
+		
+		import org.springframework.beans.factory.annotation.Autowired;
+		import org.springframework.stereotype.Controller;
+		import org.springframework.ui.Model;
+		import org.springframework.web.bind.annotation.*;
+		
+		@Controller
+		public class [name']Controller {
+			
+			@Autowired
+			I[name']Service [name]Service;
+			[controller'*]
+			
+		}]
+		with
+		name' := <capitalizing-word>name;
+		controller'* := <map(get-each-controller(|name))>controller*
+	
+	get-each-controller(|dispaName):
+		Page(url,name,para,data,_) -> 
+		$[
+		@GetMapping("[url']")
+		public String to[name']Page(Model model[para']){
+			[data']
+			return "/[dispaName]/[name]";
+		}
+		]
+		with
+		url' := <get-url>url;
+		name' := <capitalizing-word>name;
+		para' := <get-parameter(|url)>para;
+		data' := <datastat-to-controller>data
+		
+	get-each-controller(|dispaName):
+		Opr(url,method,name,para,data,goto) -> 
+		$[
+		@[method']Mapping("[url']")
+		public String operation[name'](Model model[para']){
+			  
+			  [data']
+			  
+			  return "[goto']";
+		}
+		]
+		with
+		url' := <get-url>url;
+		name' := <capitalizing-word>name;
+		method' := <get-method>method;
+		para' := <get-parameter(|url)>para;
+		data' := <datastat-to-controller>data;
+		goto' := <get-goto>goto
+
+rules
+
+	get-url:
+		Url(partUrl*) -> url
+		with
+		partUrl' := <map(get-part-url)>partUrl*;
+		url := <concat-strings>partUrl'
+	
+	get-part-url:
+		PartURL(url) -> $[/[url]]
+	get-part-url:
+		PathPara(ParaDecl(name,_)) -> $[/{[name]}]
+	
+rules
+
+	get-method:
+		Create() -> $[Post]
+	get-method:
+		Delete() -> $[Delete]
+	get-method:
+		Update() -> $[Put]
+	
+rules
+
+	datastat-to-controller:
+		None() -> $[]
+	datastat-to-controller:
+		Data(each*) -> each'*
+		with
+		each'* := <map(each-data)>each*
+	datastat-to-controller:
+		Some(Data(each*)) -> each'*
+		with
+		each'* := <map(each-data)>each*
+	
+	each-data:
+		VarDeclAndAssign(var,Call(entity,search)) ->
+		$[
+		model.addAttribute([<double-quote>var],[<lower-word>entity]Service.[search']);
+		]
+		with
+		search' := <get-search-method>search
+	each-data:
+		Call(entity,oper) ->
+		$[
+		[<lower-word>entity]Service.[<get-oper>oper];
+		]
+	
+	get-search-method:
+		GetAll() -> $[getAll()]
+	get-search-method:
+		GetById(name) -> $[getById([name])]
+	get-search-method:
+		GetByAttr(search) -> $[[<get-search-detail>search]]
+	
+	get-search-detail:
+		Is(attr,keyword) -> 
+		$[getBy[<capitalizing-word>attr]([<get-keyword>keyword])]
+	get-search-detail:
+		Like(attr,keyword) -> 
+		$[getBy[<capitalizing-word>attr]Like([<get-keyword>keyword])]
+	get-keyword:
+		String(x) -> x
+	get-keyword:
+		Int(x) -> x
+	get-keyword:
+		entity@EntityAttr(_) -> <get-entity-obj>entity
+	
+	get-oper:
+		Save(x) -> $[save([x])]
+	get-oper:
+		Delete(x) -> $[delete([x])]
+	
+rules
+
+	get-parameter(|url):
+		paraLst -> <concat-strings><conc>(urlPara,paraLst')
+//		paraLst -> urlPara
+		with
+		urlPara := <get-path-para>url;
+		paraLst' := <map(get-each-para)>paraLst
+		
+	get-path-para:
+		Url(urlLst) -> pathParaLst
+		with
+		pathPara := <collect-all(?ParaDecl(_,_))>urlLst;
+		pathParaLst := <map(get-each-path-para)>pathPara
+	
+	get-each-path-para:
+		ParaDecl(para,ty) -> $[,@PathVariable("[para]") [ty'] [para]]
+		with
+		ty' := <builtin-java-type <+ declared-java-type>ty
+	
+	get-each-para:
+		ParaDecl(para,ty) -> $[,[ty'] [para]]
+		with
+		ty' := <builtin-java-type <+ declared-java-type>ty
+			
+rules
+
+	get-goto:
+		GotoByURL(url) -> $[redirect:[<get-url>url]]
+		
+		

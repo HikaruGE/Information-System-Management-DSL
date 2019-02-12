@@ -19,21 +19,56 @@ rules // Debugging
 
 rules
 
-	test-1:
-	(selected, position, ast, path, project-path) -> (filename, result)
+	generate-entity-code:
+	(selected, position, ast, path, project-path) -> (entityFilenameLst, entityResultLst)
 	with
 		entityLst := <collect-all(find-entity)>selected;
-		entityTuple@(entityFilenameLst,entityResultLst) := <generate-entity-file>entityLst;
-		filename2 := <pagepath>;
-		filename := <conc>(entityFilenameLst,filename2);
-		result2 := <collect-all(find-page)>selected;
-		result := <conc>(entityResultLst,result2)
+		entityTuple@(entityFilenameLst,entityResultLst) := <generate-entity-file>entityLst
 	
+	generate-controller-code:
+	(selected, position, ast, path, project-path) -> (controllerFilenameLst, controllerResultLst)
+	with
+		dispatcherLst := <collect-all(find-dispatcher)>selected;
+		controllerTuple@(controllerFilenameLst, controllerResultLst) := <generate-controller-file>dispatcherLst
+	
+	generate-html-code:
+	(selected, position, ast, path, project-path) -> (pageFilenameLst, pageResultLst)
+	with
+		dispatcherLst := <collect-all(find-dispatcher)>selected;
+		pageTuple@(pageFilenameLst,pageResultLst) := <generate-html-file>dispatcherLst
+	
+	generate-ser-dao-code:
+	(selected, position, ast, path, project-path) -> (sdFilenameLst, sdResultLst)
+	with
+		entityLst := <collect-all(?Entity(_,_))>selected;
+		entityTuple@(sdFilenameLst,sdResultLst) := <generate-ser-dao>entityLst
+		
+	get-module-lst:
+		Modules(x) -> x
+		
 	find-entity =
 		?Entity(_,_)
 	
-	find-page =
-		?Page(_)
+	find-dispatcher =
+		?Dispatcher(_,_)
+	
+//	find-page =
+//		?Page(_,_,_,_)
+//		
+//	find-opr = 
+//		?Opr(_,_,_,_,_)
 		
-	pagepath = 
+//	find-communicator = 
+//		?Communicator(_,_)
+//	
+//	get-communicator-name:
+//		Communicator(x,_) -> x
+	
+//	test-tt:
+//		x -> ([[]],[["666"]])
+	
+	pagepath1 = 
 		!["test/output-pages.aterm"]
+		
+	pagepath2 = 
+		!["test/output-pages.aterm","test/output-pages2.aterm"]

@@ -4,15 +4,12 @@ imports
 	Common
 	Lexical
 
-//context-free syntax
-//  	Start = Entity
   
 sorts
 	Entity
 	Property
 	
 context-free syntax
-//	Entity.Models = <<Entity*>>
 	Entity.Entity = <entity<ID>{<Property*>}>
 	Property.Property = <<PropDecl><Annotation?>>
 

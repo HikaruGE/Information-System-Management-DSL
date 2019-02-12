@@ -17,4 +17,7 @@ menus
 
   menu: "Generation"                   (openeditor) (realtime)
     
-    action: "test-1"          = test-1
+    action: "generate entity code"          	= generate-entity-code
+    action: "generate html code"          		= generate-html-code
+	action: "generate controller code" 			= generate-controller-code
+	action: "generate dao and service code" 	= generate-ser-dao-code

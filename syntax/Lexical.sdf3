@@ -9,14 +9,20 @@ lexical syntax
   	StringChar     = "\\\"" 
   	StringChar     = BackSlashChar 
 	BackSlashChar  = "\\" 
-
-
+	
+//	URL = "/"(Path2)?(Path1)*
+//	Path1 = "/"Path2
+//	Path2 = [a-zA-Z][a-zA-Z0-9\%\~\&\-\{\}]*
+	
+//	PartURL = [a-zA-Z][a-zA-Z0-9\%\~\&\-\{\}]*
+	
 lexical restrictions
 
   // Ensure greedy matching for lexicals
   
   INT           -/- [0-9]
   ID            -/- [a-zA-Z0-9\_]
+//  PartURL			-/- [a-zA-Z][a-zA-Z0-9\%\~\&\-\{\}]
   
   // Backslash chars in strings may not be followed by " 
   

@@ -2,13 +2,199 @@ module PageDecl
 
 imports
   
-  Common
-  Lexical
+	Common
+	Lexical
+	EntityDecl
+
+sorts
+
+	Dispatcher
+	
+context-free syntax
+
+	Dispatcher.Dispatcher = <dispatcher <ID> {<Page*>}>
 
 sorts
   
-  Page
-
+ 	Page
+ 	URL
+	PartURL
+	
 context-free syntax
   
-  Page.Page = <page<ID>{}>
+  	Page.Opr = < <URL> \>\> <Operation><ID>(<{ParaDecl ","}*>){
+  					<Data>
+  					<Goto>
+  				}>
+	Operation.Create = <create>
+	Operation.Delete = <delete>
+	Operation.Update = <update>
+	
+	
+	Page.Page = <<URL> \>\> page<ID>(<{ParaDecl ","}*>){
+					<Data?>
+					<Body>
+				}>
+  		
+  	URL.Url = </<{PartURL "/"}*>>
+  	PartURL.PartURL = <<ID>>
+  	PartURL.PathPara= <{<ParaDecl>}>		
+
+sorts
+
+	Body
+	Elem
+	IO
+
+context-free syntax
+	Body.Body = <body {<Elem*>}>
+	Elem = Table
+	Elem = List
+	Elem = Form
+	Elem = IO
+	Elem = Foreach
+	Elem = Button
+	Elem = Goto
+
+sorts
+
+	Table
+	Row
+	
+context-free syntax	
+	
+	Table.Table = <table {<{Row "\n"}*>}>
+	
+	Row.Row = <row {<{Col ","}*>}>
+	Row = Foreach
+	
+	Col.Col = <col {<{ElemInCol ","}*>}>
+	ElemInCol = Var
+	ElemInCol = Elem
+
+sorts
+
+	List
+	
+context-free syntax	
+
+	List.List = <list {<ListItem*>}>
+	ListItem.ListItem = <listitem {<ElemInListItem>}>
+	ListItem = Foreach
+	ElemInListItem = Elem
+	ElemInListItem = Var
+
+sorts
+
+	Form
+	Button
+	Http
+	
+context-free syntax
+
+	Form.Form = <form (<Http>) {<Elem*>}>
+	Button.Create = <create-btn>
+	Button.Edit = <edit-btn>
+	Button.Reset = <reset-btn>
+	Button.Submit = <submit-btn>
+	Button.Delete = <<ID>. delete-btn (<ID>)>
+	Http.Post = <create <ID>>
+	Http.Put = <update <ID>>
+	
+sorts
+
+	Goto
+	
+context-free syntax
+	
+	Goto.GotoByURL = <goto (<URL>)>
+	Goto.GotoEdit = <<ID>. gotoEdit (<ID>)>
+	Goto.GotoAll = <gotoAll (<ID>)>
+	Goto.GotoCreate = <<ID>. gotoCreate ()>
+	
+sorts
+
+	IO
+	Var
+	
+context-free syntax
+
+	IO.Input = <input(<Var>)>
+	IO.Output = <output(<Var>)>
+	
+	Var.String = <<STRING>>
+	Var.Int = <<INT>>
+	Var.EntityAttr = <<{ID "."}+>>
+
+sorts
+
+	Foreach
+	ForeachElem
+		
+context-free syntax
+	
+	Foreach.Foreach = <for <ID> : <Type> in <Var> {
+						<ForeachElem*>
+						}>
+
+	ForeachElem = Table
+	ForeachElem = Row
+	ForeachElem = Col
+	ForeachElem = Form
+	ForeachElem = ListItem
+
+
+
+
+sorts
+
+	Data
+	Stat
+	
+context-free syntax
+	
+	Data.Data = <data {<{Stat "\n"}*>}> //todo
+	
+	Stat = VarDeclAndAssign
+
+sorts
+	
+	CallMethod
+	Method
+	Condition
+	
+context-free syntax
+
+	CallMethod.Call = <<ID>.<Method>>
+	Method.GetAll = <getAll ()>
+	Method.GetById = <getById (<ID>)>
+	Method.GetByAttr = <getBy (<Condition>)>
+	Method.Save = <save(<ID>)>
+	Method.Delete = <delete(<ID>)>
+	Condition.Is = <<ID> is <Var>>
+	Condition.Like = <<ID> like <Var>>
+
+sorts
+
+	VarDeclAndAssign
+	
+context-free syntax
+
+	VarDeclAndAssign.VarDeclAndAssign = <<ID> := <CallMethod>>
+	VarDeclAndAssign = CallMethod
+
+sorts
+
+	ParaDecl
+	
+context-free syntax
+	
+	ParaDecl.ParaDecl = <<ID>:<Type>>
+
+//sorts
+//
+//	Exp
+//	
+//context-free syntax
+//
+//	Exp

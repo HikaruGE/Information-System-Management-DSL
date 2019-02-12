@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>all</title>
+</head>
+
+<body>
+	<a th:href="@{/student}">Create</a>
+	<table border="1">
+	                  <tr>
+	                      <td>id</td>
+	                      <td>name</td>
+	                      <td>phone</td>
+	                      <td>operation</td>
+	                  </tr>
+	                  <div th:each="student:${students}">
+	                  	
+	                  	<tr>
+	                  	    <td><span th:text="${student.id}"></span></td>
+	                  	    <td><span th:text="${student.name}"></span></td>
+	                  	    <td><span th:text="${student.phone}"></span></td>
+	                  	    <td><a th:href="@{/student/}+${student.id}">Edit</a>
+	                  	        <form th:method="DELETE" th:action="@{/student/}+${student.id}">
+	                  	        	<button type="submit" >Delete</button>
+	                  	        </form></td>
+	                  	</tr>
+	                  </div>"
+	</table>
+</body>
+
+</html>
