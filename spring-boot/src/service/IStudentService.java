@@ -1,5 +1,5 @@
-package service;
-import entity.Student;
+package com.ims.demo.service;
+import com.ims.demo.entity.Student;
 
 import java.util.List;
 

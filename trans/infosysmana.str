@@ -20,10 +20,13 @@ rules // Debugging
 rules
 
 	generate-entity-code:
-	(selected, position, ast, path, project-path) -> (entityFilenameLst, entityResultLst)
+	(selected, position, ast, path, project-path) -> (filenameLst, resultLst)
 	with
 		entityLst := <collect-all(find-entity)>selected;
-		entityTuple@(entityFilenameLst,entityResultLst) := <generate-entity-file>entityLst
+		entityTuple@(entityFilenameLst,entityResultLst) := <generate-entity-file>entityLst;
+		serdaoTuple@(sdFilenameLst,sdResultLst) := <generate-ser-dao-code>selected;
+		filenameLst := <conc>(entityFilenameLst,sdFilenameLst);
+		resultLst := <conc>(entityResultLst,sdResultLst)
 	
 	generate-controller-code:
 	(selected, position, ast, path, project-path) -> (controllerFilenameLst, controllerResultLst)
@@ -38,11 +41,24 @@ rules
 		pageTuple@(pageFilenameLst,pageResultLst) := <generate-html-file>dispatcherLst
 	
 	generate-ser-dao-code:
-	(selected, position, ast, path, project-path) -> (sdFilenameLst, sdResultLst)
+	selected -> (sdFilenameLst, sdResultLst)
 	with
 		entityLst := <collect-all(?Entity(_,_))>selected;
 		entityTuple@(sdFilenameLst,sdResultLst) := <generate-ser-dao>entityLst
 		
+	generate-main-code:
+	(selected, position, ast, path, project-path) -> (filename, result)
+	with
+		init := <fetch-elem(?Init(_))><collect-all(?Init(_))>selected;
+		filename := "spring-boot/src/Application.java";
+		result := <generate-init-file>init
+	
+	generate-common-template-code:
+	(selected, position, ast, path, project-path) -> (filenameLst, resultLst)
+	with
+		templateLst := <collect-all(?Template(_,_,_))>selected;
+		(filenameLst, resultLst) := <generate-common-template-file>templateLst
+	
 	get-module-lst:
 		Modules(x) -> x
 		
@@ -52,23 +68,14 @@ rules
 	find-dispatcher =
 		?Dispatcher(_,_)
 	
-//	find-page =
-//		?Page(_,_,_,_)
-//		
-//	find-opr = 
-//		?Opr(_,_,_,_,_)
-		
-//	find-communicator = 
-//		?Communicator(_,_)
-//	
-//	get-communicator-name:
-//		Communicator(x,_) -> x
+	derive-entity-dsl:
+	(selected, position, ast, path, project-path) -> (filename, <concat-strings>result)
+	with
+		tarPath := <concat-strings>[<dirname>path,"/","derivation"];
+		filename := <guarantee-extension(|"ism")>tarPath;
+		entityLst := <collect-all(?Entity(_,_))>selected;
+		crudEntityLst := <collect-all(?Derive(_))>selected;
+		result := <map(generate-dispather-file(|entityLst))>crudEntityLst
 	
-//	test-tt:
-//		x -> ([[]],[["666"]])
 	
-	pagepath1 = 
-		!["test/output-pages.aterm"]
-		
-	pagepath2 = 
-		!["test/output-pages.aterm","test/output-pages2.aterm"]
+	

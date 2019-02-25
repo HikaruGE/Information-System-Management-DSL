@@ -1,6 +1,6 @@
-package service;
-import dao.StudentDao;
-import entity.Student;
+package com.ims.demo.service;
+import com.ims.demo.dao.StudentDao;
+import com.ims.demo.entity.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

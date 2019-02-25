@@ -118,7 +118,7 @@ rules
 	
 	is-preInput(|entityAttr) =
 		if <gt>(<length>entityAttr,1)
-			then get-entity-obj;gen-preInput
+			then get-entity-obj;map(lower-word);gen-preInput
 			else ![]
 		end
 		
@@ -168,27 +168,51 @@ rules
 		GotoEdit(var, entity) -> $[<a th:href="@{/[<lower-word>entity]/}+${[var].id}">Edit</a>
 		]
 	page-elem:
+		GotoAll(entity) -> $[<a th:href="@{/[<lower-word>entity]Lst}">All [entity]</a>
+		]
+	page-elem:
 		GotoCreate(entity) -> $[<a th:href="@{/[<lower-word>entity]}">Create</a>
 		]
 			
 	page-elem:
-		Delete(var, entity) -> 
+		DeleteBtn(var, entity) -> 
 		$[<form th:method="DELETE" th:action="@{/[<lower-word>entity]/}+${[var].id}">
 			<button type="submit" >Delete</button>
 		</form>]
 		
 	
 	page-elem:
-		Submit() -> $[<button type="submit" value="Submit">Submit</button>]
+		SubmitBtn() -> $[<button type="submit" value="Submit">Submit</button>]
 		
 	page-elem:
-		Edit() -> $[<button type="submit" value="Edit">Edit</button>]
+		EditBtn() -> $[<button type="submit" value="Edit">Edit</button>]
 		
 	page-elem:
-		Create() -> $[<button type="submit" value="Create">Create</button>]
+		CreateBtn() -> $[<button type="submit" value="Create">Create</button>]
 	
 	page-elem:
-		Reset() -> $[<input type="reset" value="Reset">]
+		ResetBtn() -> $[<input type="reset" value="Reset">]
+		
+		
+	page-elem:
+		Selection("multi",optionLst,EntityAttr([entity, attr]),prop) -> 
+		$[<input name="[attr]" type="checkbox" 
+		th:checked="${[<lower-word>entity] != null? #lists.contains([<lower-word>entity].[attr], option):null}" 
+		th:each="option:${[optionLst]}" th:text="${option.[prop]}" th:value="${option.id}">]
+		
+	page-elem:
+		Selection("single",optionLst,EntityAttr([entity, attr]),prop) ->
+		$[<select name="[attr]">
+			<option th:selected="${[<lower-word>entity] == null}" value="">---Please Select---</option>
+			<option th:each="opt:${optionLst}" th:selected="${opt.id == [<lower-word>entity].[attr]}" 
+				th:value="${opt.id}" th:text="opt.[prop]"></option>
+		</select>]
+		
+		
+		
+		
+		
+		
 		
 		
 		

@@ -6,7 +6,7 @@
 </head>
 
 <body>
-	<form th:method="POST" th:action="@{/student}">
+	<form th:method="POST" th:action="@{/subject}">
 		
 		<table border="1">
 		                  <tr>
@@ -14,14 +14,10 @@
 		                      <td><input name="name" type="text" /></td>
 		                  </tr>
 		                  <tr>
-		                      <td>phone</td>
-		                      <td><input name="phone" type="text" /></td>
-		                  </tr>
-		                  <tr>
-		                      <td>subjects</td>
-		                      <td><input name="subjects" type="checkbox" 
-		                          th:checked="${student != null? #lists.contains(student.subjects, option):null}" 
-		                          th:each="option:${subjectsLst}" th:text="${option.id}" th:value="${option.id}"></td>
+		                      <td>enrollStu</td>
+		                      <td><input name="enrollStu" type="checkbox" 
+		                          th:checked="${subject != null? #lists.contains(subject.enrollStu, option):null}" 
+		                          th:each="option:${enrollStuLst}" th:text="${option.id}" th:value="${option.id}"></td>
 		                  </tr>
 		                  <tr>
 		                      <td><button type="submit" value="Create">Create</button></td>

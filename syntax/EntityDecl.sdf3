@@ -36,4 +36,10 @@ context-free syntax
 	Type.Type = <<ID>>
 	Type.ListType = <List \<<ID>\>>
 	Type.SetType = <Set \<<ID>\>>
-	
+
+
+sorts Drive
+
+context-free syntax
+
+	Derive.Derive = <derive CRUD <ID>>

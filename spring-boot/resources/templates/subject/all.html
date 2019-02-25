@@ -6,30 +6,28 @@
 </head>
 
 <body>
-	<a th:href="@{/student}">Create</a>
+	<a th:href="@{/subject}">Create</a>
 	<table border="1">
 	                  <tr>
 	                      <td>id</td>
 	                      <td>name</td>
-	                      <td>phone</td>
-	                      <td>subjects</td>
+	                      <td>enrollStu</td>
 	                      <td>operation</td>
 	                  </tr>
-	                  <div th:each="student:${studentLst}">
+	                  <div th:each="subject:${subjectLst}">
 	                  	
 	                  	<tr>
-	                  	    <td><span th:text="${student.id}"></span></td>
-	                  	    <td><span th:text="${student.name}"></span></td>
-	                  	    <td><span th:text="${student.phone}"></span></td>
+	                  	    <td><span th:text="${subject.id}"></span></td>
+	                  	    <td><span th:text="${subject.name}"></span></td>
 	                  	    <td>
 	                  	        <ul>
-	                  	            <div th:each="subject:${student.subjects}">
-	                  	            	<li><span th:text="${subject.id}"></span></li>
+	                  	            <div th:each="student:${subject.enrollStu}">
+	                  	            	<li><span th:text="${student.id}"></span></li>
 	                  	            </div>"
 	                  	        </ul>
 	                  	        </td>
-	                  	    <td><a th:href="@{/student/}+${student.id}">Edit</a>
-	                  	        <form th:method="DELETE" th:action="@{/student/}+${student.id}">
+	                  	    <td><a th:href="@{/subject/}+${subject.id}">Edit</a>
+	                  	        <form th:method="DELETE" th:action="@{/subject/}+${subject.id}">
 	                  	        	<button type="submit" >Delete</button>
 	                  	        </form></td>
 	                  	</tr>

@@ -1,102 +1,166 @@
 entity Student{
 	name : String
 	phone : String
+	subjects -> Set<Subject>
 }
 
-dispatcher student {
-	
-	/studentLst >> 
-		page all(){
-			data{
-				students := Student.getAll()
-			}
-			
-			body{
-				Student.gotoCreate()
-				table{
-					row{
-						col{output("id")},
-						col{output("name")},
-						col{output("phone")},
-						col{output("operation")}
-					}
-					
-					for student:Student in students{
-						row{
-							col{output(student.id)},
-							col{output(student.name)},
-							col{output(student.phone)},
-							col{student.gotoEdit(Student),student.delete-btn(Student)}
-						}
-					}
+entity Subject{
+	name : String
+	enrollStu -> Set<Student>(dominatedBy="Student.subjects")
+}
+
+derive CRUD Student
+derive CRUD Subject
+
+init{
+
+	sub1 := Subject{
+				name := "Math"
 				}
-			}
-		}
-		
-	/student/{id:Long} >>
-		page edit(){
-			data{
-				student := Student.getById(id)
-			}
-			
-			body{
-				form(update Student){
-					table{
-						row{
-							col{output("name")},col{input(student.name)}
-						}
-						row{
-							col{output("phone")},col{input(student.phone)}
-						}
-						row{
-							col{edit-btn},col{reset-btn}
-						}
-					}
+	Subject.save(sub1)
+	
+	
+	sub2 := Subject{
+				name := "English"
 				}
-			}
-		}
-	
-	/student >>
-		page add(){
-			body{
-				form(create Student){
-					table{
-						row{
-							col{output("name")},col{input(name)}
-						}
-						row{
-							col{output("phone")},col{input(phone)}
-						}
-						row{
-							col{create-btn},col{reset-btn}
-						}
-					}
+	Subject.save(sub2)
+
+	stu1 := Student{ 
+				name := "s1"
+				phone := "111"
+				subjects := [sub1,sub2]
 				}
+	Student.save(stu1)
+} 
+
+template navbar(){
+		list{
+			listitem{gotoAll(Subject)}
+			listitem{gotoAll(Student)}
+		}
+}
+
+dispatcher main {
+
+	/index >>
+		page main(){
+//			data{}
+			body{
+				template.navbar()
 			}
 		}
-	
-	/student >>
-	create add(stu:Student){
-		data{
-			Student.save(stu)
-		}
-		goto(/studentLst)
-	}
-	
-	/student >>
-	update update(stu:Student){
-		data{
-			Student.save(stu)
-		}
-		goto(/studentLst)
-	}
-	
-	/student/{id:Long} >>
-	delete delete(stu:Student){
-		data{
-			Student.delete(id)
-		}
-		goto(/studentLst)
-	}
 	
 }
+
+//template pagebar(studentList){
+//
+//}
+
+//
+//dispatcher student {
+////	
+////	/studentLst >> 
+////		page all(){
+////			data{
+////				students := Student.getAll()
+////			}
+////			
+////			body{
+////				Student.gotoCreate()
+////				table{
+////					row{
+////						col{output("id")},
+////						col{output("name")},
+////						col{output("phone")},
+////						col{output("operation")}
+////					}
+////					
+////					for student:Student in students{
+////						row{
+////							col{output(student.id)},
+////							col{output(student.name)},
+////							col{output(student.phone)},
+////							col{
+////								list{
+////									for subject:Subject in students.subjects{
+////										listitem{output(subject.name)}
+////									}
+////								}
+////							},
+////							col{student.gotoEdit(Student),student.delete-btn(Student)}
+////						}
+////					}
+////				}
+////			}
+////		}
+////		
+////	/student/{id:Long} >>
+////		page edit(){
+////			data{
+////				student := Student.getById(id)
+////			}
+////			
+////			body{
+////				form(update Student){
+////					table{
+////						row{
+////							col{output("name")},col{input(student.name)}
+////						}
+////						row{
+////							col{output("phone")},col{input(student.phone)}
+////						}
+////						row{
+////							col{edit-btn},col{reset-btn}
+////						}
+////					}
+////				}
+////			}
+////		}
+////	
+//	/student >>
+//		page add(){
+//			body{
+//				form(create Student){
+//					table{
+//						row{
+//							col{output("name")},col{input(name)}
+//						}
+//						row{
+//							col{output("phone")},col{input(phone)}
+//						}
+//						row{
+//							col{output("subject")},col{selection(multi, subjectLst, Student.subjects){name}}
+//						}
+//						row{
+//							col{create-btn},col{reset-btn}
+//						}
+//					}
+//				}
+//			}
+//		}
+////	
+////	/student >>
+////	create add(stu:Student){
+////		data{
+////			Student.save(stu)
+////		}
+////		goto(/studentLst)
+////	}
+////	
+////	/student >>
+////	update update(stu:Student){
+////		data{
+////			Student.save(stu)
+////		}
+////		goto(/studentLst)
+////	}
+////	
+////	/student/{id:Long} >>
+////	delete delete(stu:Student){
+////		data{
+////			Student.delete(id)
+////		}
+////		goto(/studentLst)
+////	}
+////	
+//}

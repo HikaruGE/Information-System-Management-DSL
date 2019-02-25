@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class Student{
+public class Subject{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,21 +13,16 @@ public class Student{
 	public Long getId() {return id;}
 	public void setId(Long id) {this.id = id;}
 	
-	public Student(){ }
+	public Subject(){ }
 	
 	@Column
 	private String name;
 	public String getName(){return name;}
 	public void setName(String name){this.name = name;}
 	
-	@Column
-	private String phone;
-	public String getPhone(){return phone;}
-	public void setPhone(String phone){this.phone = phone;}
-	
-	@ManyToMany(fetch = FetchType.EAGER)
-	private Set<Subject> subjects= new HashSet<>();
-	public Set<Subject> getSubjects(){return subjects;}
-	public void setSubjects(Set<Subject> subjects){this.subjects = subjects;}
+	@ManyToMany(fetch = FetchType.EAGER,mappedBy="subjects")
+	private Set<Student> enrollStu= new HashSet<>();
+	public Set<Student> getEnrollStu(){return enrollStu;}
+	public void setEnrollStu(Set<Student> enrollStu){this.enrollStu = enrollStu;}
 	
 	}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+	<meta charset="UTF-8">
+	<title>edit</title>
+</head>
+
+<body>
+	<form th:method="PUT" th:action="@{/subject}">
+		<input type="hidden" name="id" th:value="${subject.id}">
+		<table border="1">
+		                  <tr>
+		                      <td>name</td>
+		                      <td><input name="name" type="text" th:value="${subject.name}"/></td>
+		                  </tr>
+		                  <tr>
+		                      <td>enrollStu</td>
+		                      <td><input name="enrollStu" type="checkbox" 
+		                          th:checked="${subject != null? #lists.contains(subject.enrollStu, option):null}" 
+		                          th:each="option:${enrollStuLst}" th:text="${option.id}" th:value="${option.id}"></td>
+		                  </tr>
+		                  <tr>
+		                      <td><button type="submit" value="Edit">Edit</button></td>
+		                      <td><input type="reset" value="Reset"></td>
+		                  </tr>
+		</table>
+	</form>
+	
+</body>
+
+</html>

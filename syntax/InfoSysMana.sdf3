@@ -5,6 +5,8 @@ imports
   Common
   EntityDecl
   PageDecl
+  InitDecl
+  TemplateDecl
 
 context-free start-symbols
   
@@ -23,3 +25,6 @@ context-free syntax
   
   Module = Entity
   Module = Dispatcher
+  Module = Derive
+  Module = Init
+  Module = Template

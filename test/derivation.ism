@@ -1,0 +1,256 @@
+
+dispatcher student{
+	
+	/studentLst >>
+	page all(){
+		data{
+			studentLst := Student.getAll()
+		}
+		
+		body{
+			Student.gotoCreate()
+			table{
+				row{
+					col{output("id")},
+					col{output("name")},
+					col{output("phone")},
+					col{output("subjects")},
+					
+					col{output("operation")}
+				}
+				
+				for student:Student in studentLst{
+					row{
+						col{output(student.id)},
+						col{output(student.name)},
+						col{output(student.phone)},
+						col{
+							list{
+								for subject:Subject in student.subjects{
+									listitem{output(subject.id)}
+									}
+								}
+						},
+						
+						col{student.gotoEdit(Student),student.delete-btn(Student)}
+//						,
+//						col{gotoAll(Student)}
+					}
+				}
+			}
+		}
+	}
+	
+	/student/{id:Long} >>
+	page edit(){
+		data{
+			student := Student.getById(id)
+			subjectsLst := Subject.getAll()
+			
+		}
+		
+		body{
+			form(update Student){
+				table{
+					
+					row{
+						col{output("name")},col{input(Student.name)}
+						}
+					row{
+						col{output("phone")},col{input(Student.phone)}
+						}
+					row{
+						col{output("subjects")},col{selection(multi, subjectsLst, Student.subjects){id}}
+					}
+					
+					
+					row{
+						col{edit-btn},col{reset-btn}
+					}
+				}
+			}
+		}
+	}
+	
+	
+	/student >>
+	page add(){
+		data{
+			subjectsLst := Subject.getAll()
+			
+		}
+		
+		body{
+			form(create Student){
+				table{
+					
+					row{
+						col{output("name")},col{input(name)}
+						}
+					row{
+						col{output("phone")},col{input(phone)}
+						}
+					row{
+						col{output("subjects")},col{selection(multi, subjectsLst, Student.subjects){id}}
+						}
+					
+					
+					row{
+						col{create-btn},col{reset-btn}
+					}
+				}
+			}
+		}
+	}
+	
+	
+	/student >>
+	create add(student:Student){
+		data{
+			Student.save(student)
+		}
+		goto(/studentLst)
+	}
+	
+	
+	/student >>
+	update update(student:Student){
+		data{
+			Student.save(student)
+		}
+		goto(/studentLst)
+	}
+	
+	
+	/student/{id:Long} >>
+	delete delete(student:Student){
+		data{
+			Student.delete(id)
+		}
+		goto(/studentLst)
+	}
+	
+}
+
+dispatcher subject{
+	
+	/subjectLst >>
+	page all(){
+		data{
+			subjectLst := Subject.getAll()
+		}
+		
+		body{
+			Subject.gotoCreate()
+			table{
+				row{
+					col{output("id")},
+					col{output("name")},
+					col{output("enrollStu")},
+					
+					col{output("operation")}
+				}
+				
+				for subject:Subject in subjectLst{
+					row{
+						col{output(subject.id)},
+						col{output(subject.name)},
+						col{
+							list{
+								for student:Student in subject.enrollStu{
+									listitem{output(student.id)}
+									}
+								}
+						},
+						
+						col{subject.gotoEdit(Subject),subject.delete-btn(Subject)}
+					}
+				}
+			}
+		}
+	}
+	
+	/subject/{id:Long} >>
+	page edit(){
+		data{
+			subject := Subject.getById(id)
+			enrollStuLst := Student.getAll()
+			
+		}
+		
+		body{
+			form(update Subject){
+				table{
+					
+					row{
+						col{output("name")},col{input(Subject.name)}
+						}
+					row{
+						col{output("enrollStu")},col{selection(multi, enrollStuLst, Subject.enrollStu){id}}
+					}
+					
+					
+					row{
+						col{edit-btn},col{reset-btn}
+					}
+				}
+			}
+		}
+	}
+	
+	
+	/subject >>
+	page add(){
+		data{
+			enrollStuLst := Student.getAll()
+			
+		}
+		
+		body{
+			form(create Subject){
+				table{
+					
+					row{
+						col{output("name")},col{input(name)}
+						}
+					row{
+						col{output("enrollStu")},col{selection(multi, enrollStuLst, Subject.enrollStu){id}}
+						}
+					
+					
+					row{
+						col{create-btn},col{reset-btn}
+					}
+				}
+			}
+		}
+	}
+	
+	
+	/subject >>
+	create add(subject:Subject){
+		data{
+			Subject.save(subject)
+		}
+		goto(/subjectLst)
+	}
+	
+	
+	/subject >>
+	update update(subject:Subject){
+		data{
+			Subject.save(subject)
+		}
+		goto(/subjectLst)
+	}
+	
+	
+	/subject/{id:Long} >>
+	delete delete(subject:Subject){
+		data{
+			Subject.delete(id)
+		}
+		goto(/subjectLst)
+	}
+	
+}

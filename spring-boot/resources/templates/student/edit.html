@@ -18,6 +18,12 @@
 		                      <td><input name="phone" type="text" th:value="${student.phone}"/></td>
 		                  </tr>
 		                  <tr>
+		                      <td>subjects</td>
+		                      <td><input name="subjects" type="checkbox" 
+		                          th:checked="${student != null? #lists.contains(student.subjects, option):null}" 
+		                          th:each="option:${subjectsLst}" th:text="${option.id}" th:value="${option.id}"></td>
+		                  </tr>
+		                  <tr>
 		                      <td><button type="submit" value="Edit">Edit</button></td>
 		                      <td><input type="reset" value="Reset"></td>
 		                  </tr>

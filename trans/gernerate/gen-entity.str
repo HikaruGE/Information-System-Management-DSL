@@ -7,6 +7,7 @@ imports
 	outline
 	analysis
 	signatures/-
+	gernerate/-
 	
 rules
 	
@@ -35,15 +36,17 @@ rules //class body
 
 	entity-to-class(|entityLst):
 	Entity(className,prop*)->
-	$[package entity;
+	$[package [<get-package>].entity;
 	  
 	  import javax.persistence.*;
+	  import java.util.HashSet;
+	  import java.util.Set;
 	  
 	  @Entity
 	  public class [className]{
 	  
 	  	@Id
-	  	@GeneratedValue
+	  	@GeneratedValue(strategy = GenerationType.IDENTITY)
     	private Long id;
     	public Long getId() {return id;}
     	public void setId(Long id) {this.id = id;}
@@ -76,7 +79,7 @@ rules //each property
 	[relation]
 	private [type'] [propName][newSet];
 	public [type'] get[propName'](){return [propName];}
-	public void set[propName'](){this.[propName] = [propName];}
+	public void set[propName']([type'] [propName]){this.[propName] = [propName];}
 	]
 	with
 		propName' := <capitalizing-word>propName;

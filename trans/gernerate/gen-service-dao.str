@@ -48,8 +48,8 @@ rules
 
 	entity-to-ser-inter:
 		Entity(name,prop*) -> 
-		$[package service;
-		import entity.[name];
+		$[package [<get-package>].service;
+		import [<get-package>].entity.[name];
 		
 		import java.util.List;
 		
@@ -68,9 +68,9 @@ rules
 		
 	entity-to-ser-impl:
 		Entity(name,prop*) -> 
-		$[package service;
-		import dao.[name]Dao;
-		import entity.[name];
+		$[package [<get-package>].service;
+		import [<get-package>].dao.[name]Dao;
+		import [<get-package>].entity.[name];
 		import org.springframework.beans.factory.annotation.Autowired;
 		import org.springframework.stereotype.Service;
 		
@@ -110,9 +110,9 @@ rules
 		
 	entity-to-dao:
 		Entity(name,prop*) -> 
-		$[package dao;
+		$[package [<get-package>].dao;
 		
-		import entity.[name];
+		import [<get-package>].entity.[name];
 		import org.springframework.data.jpa.repository.JpaRepository;
 		import org.springframework.stereotype.Repository;
 		
@@ -121,7 +121,7 @@ rules
 		@Repository
 		public interface [name]Dao extends JpaRepository<[name],Long> {
 			
-			Student find[name]ById(Long id);
+			[name] find[name]ById(Long id);
 			List<[name]> findAll();
 		
 			[prop'*]

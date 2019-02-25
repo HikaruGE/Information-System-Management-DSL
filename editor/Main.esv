@@ -20,4 +20,10 @@ menus
     action: "generate entity code"          	= generate-entity-code
     action: "generate html code"          		= generate-html-code
 	action: "generate controller code" 			= generate-controller-code
-	action: "generate dao and service code" 	= generate-ser-dao-code
+//	action: "generate dao and service code" 	= generate-ser-dao-code 
+	action: "generate init code" 				= generate-main-code
+	action: "generate template code" 			= generate-common-template-code
+
+  menu: "Derive"						(openeditor) (realtime)
+  	
+  	action: "derive entity DSL"          	= derive-entity-dsl

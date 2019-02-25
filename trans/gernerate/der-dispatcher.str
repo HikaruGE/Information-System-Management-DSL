@@ -1,0 +1,237 @@
+module der-dispatcher
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	gernerate/-
+	
+rules
+
+	generate-dispather-file(|entityLst):
+		Derive(entity) -> 
+		$[
+		dispatcher [<lower-word>entity]{
+			[<page-all(|entity)>props]
+			[<page-edit(|entity)>props]
+			[<page-add(|entity)>props]
+			[<operation-add(|entity)>]
+			[<operation-update(|entity)>]
+			[<operation-delete(|entity)>]
+		}
+		]
+		with
+			ent := <find-props-by-entity(|entity)>entityLst;
+			props := <get-props>ent
+		
+	find-props-by-entity(|entityName):
+		entityLst -> entity
+	with
+		entity-after-filter := <map(entity-filter-by-className(|entityName))>entityLst;
+		entity := <fetch-elem(?Entity(_,_))>entity-after-filter
+		
+rules
+
+	page-all(|entity):
+		props ->
+		$[
+		/[lower-entity]Lst >>
+		page all(){
+			data{
+				[lower-entity]Lst := [entity].getAll()
+			}
+			
+			body{
+				[entity].gotoCreate()
+				table{
+					row{
+						col{output("id")},
+						[<map(table-tag)>props]
+						col{output("operation")}
+					}
+					
+					for [lower-entity]:[entity] in [lower-entity]Lst{
+						row{
+							col{output([lower-entity].id)},
+							[<map(table-output(|lower-entity))>props]
+							col{[lower-entity].gotoEdit([entity]),[lower-entity].delete-btn([entity])}
+						}
+					}
+				}
+			}
+		}]
+		with
+			lower-entity := <lower-word>entity
+
+	page-edit(|entity):
+		props ->
+		$[
+		/[lower-entity]/{id:Long} >>
+		page edit(){
+			data{
+				[lower-entity] := [entity].getById(id)
+				[<data-edit-add>props]
+			}
+			
+			body{
+				form(update [entity]){
+					table{
+						
+						[<map(table-edit-row(|entity))>props]
+						
+						row{
+							col{edit-btn},col{reset-btn}
+						}
+					}
+				}
+			}
+		}
+		]
+		with
+			lower-entity := <lower-word>entity
+	
+	page-add(|entity):
+		props ->
+		$[
+		/[lower-entity] >>
+		page add(){
+			data{
+				[<data-edit-add>props]
+			}
+			
+			body{
+				form(create [entity]){
+					table{
+						
+						[<map(table-add-row(|entity))>props]
+						
+						row{
+							col{create-btn},col{reset-btn}
+						}
+					}
+				}
+			}
+		}
+		]
+		with
+			lower-entity := <lower-word>entity
+			
+	operation-add(|entity) =
+		!$[
+		/[<lower-word>entity] >>
+		create add([<lower-word>entity]:[entity]){
+			data{
+				[entity].save([<lower-word>entity])
+			}
+			goto(/[<lower-word>entity]Lst)
+		}
+		]
+		
+	operation-update(|entity) =
+		!$[
+		/[<lower-word>entity] >>
+		update update([<lower-word>entity]:[entity]){
+			data{
+				[entity].save([<lower-word>entity])
+			}
+			goto(/[<lower-word>entity]Lst)
+		}
+		]
+		
+	operation-delete(|entity) =
+		!$[
+		/[<lower-word>entity]/{id:Long} >>
+		delete delete([<lower-word>entity]:[entity]){
+			data{
+				[entity].delete(id)
+			}
+			goto(/[<lower-word>entity]Lst)
+		}
+		]
+	
+	
+	
+rules
+
+	table-tag:
+		Property(MemberAttr(name, _), _) ->
+		$[col{output("[name]")},
+		]
+	table-tag:
+		Property(ReferAttr(name, _), _)->
+		$[col{output("[name]")},
+		]
+	
+	table-output(|entity):
+		Property(MemberAttr(name, _), _) ->
+		$[col{output([entity].[name])},
+		]
+	table-output(|entity):
+		Property(ReferAttr(name, ty), _) ->
+		$[col{
+			list{
+				for [<lower-word>propTy]:[propTy] in [entity].[name]{
+					listitem{output([<lower-word>propTy].id)}
+					}
+				}
+		},
+		]
+		with
+		propTy := <get-type>ty
+	
+	get-type:
+		SetType(x) -> x
+	get-type:
+		ListType(x) -> x
+	get-type:
+		Type(x) -> x
+		
+	table-edit-row(|entity):
+		Property(MemberAttr(name, _), _) ->
+		$[row{
+			col{output("[name]")},col{input([entity].[name])}
+			}
+		]
+	table-edit-row(|entity):
+		Property(ReferAttr(name, ty), _) ->
+		$[row{
+			col{output("[name]")},col{selection([mult-type], [name]Lst, [entity].[name]){id}}
+		}
+		]
+		with
+		mult-type := <get-select-type>ty
+		
+	get-select-type:
+		SetType(_)->$[multi]
+	get-select-type:
+		Type(_)->$[single]
+		
+	table-add-row(|entity):
+		Property(MemberAttr(name, _), _) ->
+		$[row{
+			col{output("[name]")},col{input([name])}
+			}
+		]
+	table-add-row(|entity):
+		Property(ReferAttr(name, ty), _) ->
+		$[row{
+			col{output("[name]")},col{selection([mult-type], [name]Lst, [entity].[name]){id}}
+			}
+		]
+		with
+		mult-type := <get-select-type>ty
+	
+	data-edit-add:
+		props -> $[[<map(generate-option)>referProps]]
+		with
+		referProps := <collect-all(?Property(ReferAttr(_, _),_))>props
+		
+	generate-option:
+		Property(ReferAttr(attr, ty),_) -> 
+		$[[attr]Lst := [entity].getAll()
+		]
+		with
+		entity := <get-type>ty

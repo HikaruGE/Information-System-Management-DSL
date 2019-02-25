@@ -1,0 +1,19 @@
+module TemplateDecl
+
+imports
+  
+	Common
+	Lexical
+	PageDecl
+	
+sorts
+	
+	Template
+	TemAssign
+	
+context-free syntax
+
+	Template.Template = <template <ID>(<{ID ","}*>) { <Elem*> }>
+	
+//	TemAssign.TemAssign = <<ID> := <Elem>>
+	

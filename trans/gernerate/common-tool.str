@@ -1,0 +1,14 @@
+module common-tool
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	
+rules
+
+	get-package =
+		!$[com.ims.demo]

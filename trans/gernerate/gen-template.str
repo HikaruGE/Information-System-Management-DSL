@@ -1,0 +1,44 @@
+module gen-template
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	gernerate/-
+	
+rules
+
+	generate-common-template-file:
+		templateLst -> (filenameLst, resultLst)
+		with
+		filenameLst := <generate-common-template-fileLst>templateLst;
+		resultLst := <map(generate-common-template-html)>templateLst
+		
+	generate-common-template-fileLst:
+		templateLst -> filenameLst
+		with
+		nameLst := <map(get-template-name)>templateLst;
+		prefix := "spring-boot/resources/templates/common/";
+		targetPathLst:= <map(\x-><concat-strings>[prefix,x]\)>nameLst;
+		filenameLst := <map(guarantee-extension(|"html"))> targetPathLst
+		
+	get-template-name:
+		Template(x,_,_) -> x
+		
+rules
+
+	generate-common-template-html:
+		Template(x,_,elem*) -> 
+		$[<!DOCTYPE html>
+		<html xmlns:th="http://www.thymeleaf.org">
+		<body>
+			<div th:fragment="[x]">
+				[<map(page-elem)>elem*]
+			</div>
+		</body>
+		</html>
+		]
+		

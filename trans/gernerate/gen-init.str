@@ -1,0 +1,87 @@
+module gen-init
+
+imports
+
+	completion/completion
+	pp
+	outline
+	analysis
+	signatures/-
+	gernerate/-
+	
+rules
+
+	generate-init-file:
+		Init(stat*) ->
+		$[package [<get-package>];
+		
+		import org.springframework.boot.SpringApplication;
+		import org.springframework.boot.autoconfigure.SpringBootApplication;
+		import org.springframework.beans.factory.annotation.Autowired;
+		import org.springframework.boot.CommandLineRunner;
+		
+		import [<get-package>].entity.*;
+		import [<get-package>].service.*;
+		
+		@SpringBootApplication
+		public class Application implements CommandLineRunner{
+			
+			[<other-services>stat*]
+			
+			public static void main(String["[]"] args){
+				SpringApplication.run(Application.class, args);
+			}
+			
+			@Override
+			public void run(String... args){
+				
+				[<map(gennerate-override)>stat*]
+				
+			}
+		
+		}
+		]
+		
+rules
+
+	gennerate-override:
+		Assign(obj,rhs) ->
+		$[
+		[ty] [obj] = new [ty]();
+		[setProps]]
+		with
+		ty := <get-var-type>rhs;
+		setProps := <get-set-props(|obj)>rhs
+	
+	gennerate-override:
+		call@Call(_,_) -> <each-data>call
+		
+	get-var-type:
+		ObjExp(name,_) -> $[[name]]
+		
+	get-set-props(|obj):
+		ObjExp(name,props) -> 
+		$[[<map(set-each-prop(|obj))>props]]
+		
+	set-each-prop(|obj):
+		Single(propName, var) -> 
+		$[[obj].set[<capitalizing-word>propName]([var']);
+		]
+		with
+		var' := <get-var>var
+		
+	set-each-prop(|obj):
+		Many(propName, obj*) -> 
+		$[[obj].get[<capitalizing-word>propName]().clear();
+		[<map(add-item(|obj,propName))>obj*]
+		]
+	add-item(|obj,propName):
+		addObj -> 
+		$[[obj].get[<capitalizing-word>propName]().add([addObj]);
+		]
+rules
+
+	get-var:
+		String(x) -> x
+	get-var:
+		Int(x) -> x

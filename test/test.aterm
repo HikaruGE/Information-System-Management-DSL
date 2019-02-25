@@ -3,126 +3,57 @@ Modules(
       "Student"
     , [ Property(MemberAttr("name", Type("String")), None())
       , Property(MemberAttr("phone", Type("String")), None())
+      , Property(ReferAttr("subjects", SetType("Subject")), None())
       ]
     )
+  , Entity(
+      "Subject"
+    , [ Property(MemberAttr("name", Type("String")), None())
+      , Property(
+          ReferAttr("enrollStu", SetType("Student"))
+        , Some(Annotation([DominatedBy("Student", "subjects")]))
+        )
+      ]
+    )
+  , Derive("Student")
+  , Derive("Subject")
+  , Init(
+      [ Assign(
+          "sub1"
+        , ObjExp("Subject", [Single("name", String("\"Math\""))])
+        )
+      , Call("Subject", Save("sub1"))
+      , Assign(
+          "sub2"
+        , ObjExp("Subject", [Single("name", String("\"English\""))])
+        )
+      , Call("Subject", Save("sub2"))
+      , Assign(
+          "stu1"
+        , ObjExp(
+            "Student"
+          , [ Single("name", String("\"s1\""))
+            , Single("phone", String("\"111\""))
+            , Many("subjects", ["sub1", "sub2"])
+            ]
+          )
+        )
+      , Call("Student", Save("stu1"))
+      ]
+    )
+  , Template(
+      "navbar"
+    , []
+    , [List([ListItem(GotoAll("Subject")), ListItem(GotoAll("Student"))])]
+    )
   , Dispatcher(
-      "student"
+      "main"
     , [ Page(
-          Url([PartURL("studentLst")])
-        , "all"
-        , []
-        , Some(Data([VarDeclAndAssign("students", Call("Student", GetAll()))]))
-        , Body(
-            [ GotoCreate("Student")
-            , Table(
-                [ Row(
-                    [ Col([Output(String("\"id\""))])
-                    , Col([Output(String("\"name\""))])
-                    , Col([Output(String("\"phone\""))])
-                    , Col([Output(String("\"operation\""))])
-                    ]
-                  )
-                , Foreach(
-                    "student"
-                  , Type("Student")
-                  , EntityAttr(["students"])
-                  , [ Row(
-                        [ Col([Output(EntityAttr(["student", "id"]))])
-                        , Col([Output(EntityAttr(["student", "name"]))])
-                        , Col([Output(EntityAttr(["student", "phone"]))])
-                        , Col([GotoEdit("student", "Student"), Delete("student", "Student")])
-                        ]
-                      )
-                    ]
-                  )
-                ]
-              )
-            ]
-          )
-        )
-      , Page(
-          Url(
-            [PartURL("student"), PathPara(ParaDecl("id", Type("Long")))]
-          )
-        , "edit"
-        , []
-        , Some(
-            Data([VarDeclAndAssign("student", Call("Student", GetById("id")))])
-          )
-        , Body(
-            [ Form(
-                Put("Student")
-              , [ Table(
-                    [ Row(
-                        [ Col([Output(String("\"name\""))])
-                        , Col([Input(EntityAttr(["student", "name"]))])
-                        ]
-                      )
-                    , Row(
-                        [ Col([Output(String("\"phone\""))])
-                        , Col([Input(EntityAttr(["student", "phone"]))])
-                        ]
-                      )
-                    , Row([Col([Edit()]), Col([Reset()])])
-                    ]
-                  )
-                ]
-              )
-            ]
-          )
-        )
-      , Page(
-          Url([PartURL("student")])
-        , "add"
+          Url([PartURL("index")])
+        , "main"
         , []
         , None()
-        , Body(
-            [ Form(
-                Post("Student")
-              , [ Table(
-                    [ Row(
-                        [ Col([Output(String("\"name\""))])
-                        , Col([Input(EntityAttr(["name"]))])
-                        ]
-                      )
-                    , Row(
-                        [ Col([Output(String("\"phone\""))])
-                        , Col([Input(EntityAttr(["phone"]))])
-                        ]
-                      )
-                    , Row([Col([Create()]), Col([Reset()])])
-                    ]
-                  )
-                ]
-              )
-            ]
-          )
-        )
-      , Opr(
-          Url([PartURL("student")])
-        , Create()
-        , "add"
-        , [ParaDecl("stu", Type("Student"))]
-        , Data([Call("Student", Save("stu"))])
-        , GotoByURL(Url([PartURL("studentLst")]))
-        )
-      , Opr(
-          Url([PartURL("student")])
-        , Update()
-        , "update"
-        , [ParaDecl("stu", Type("Student"))]
-        , Data([Call("Student", Save("stu"))])
-        , GotoByURL(Url([PartURL("studentLst")]))
-        )
-      , Opr(
-          Url(
-            [PartURL("student"), PathPara(ParaDecl("id", Type("Long")))]
-          )
-        , Delete()
-        , "delete"
-        , [ParaDecl("stu", Type("Student"))]
-        , Data([Call("Student", Delete("id"))])
-        , GotoByURL(Url([PartURL("studentLst")]))
+        , Body([Fragment("navbar", [])])
         )
       ]
     )

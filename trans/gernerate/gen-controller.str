@@ -51,8 +51,8 @@ rules
 		Dispatcher(name,controller*) -> 
 		$[package controller;
 		
-		import service.*;
-		import entity.*;
+		import [<get-package>].service.*;
+		import [<get-package>].entity.*;
 		
 		import org.springframework.beans.factory.annotation.Autowired;
 		import org.springframework.stereotype.Controller;
@@ -62,10 +62,9 @@ rules
 		@Controller
 		public class [name']Controller {
 			
-			@Autowired
-			I[name']Service [name]Service;
-			[controller'*]
+			[<other-services>controller*]
 			
+			[controller'*]
 		}]
 		with
 		name' := <capitalizing-word>name;
@@ -208,4 +207,22 @@ rules
 	get-goto:
 		GotoByURL(url) -> $[redirect:[<get-url>url]]
 		
-		
+rules
+
+	other-services:
+		con* -> result
+		with
+			services := <collect-all(?Call(_,_))>con*;
+			entityCalled := <make-set><map(implode-string)><map(explode-string)><map(get-entity-in-call)>services;
+//			result := <write-to-string>entityCalled
+			result := <map(autowire-service)>entityCalled
+	
+	autowire-service:
+		entity ->
+		$[
+		@Autowired
+		I[entity]Service [<lower-word>entity]Service;
+		]
+	
+	get-entity-in-call:
+		Call(x,_) -> x

@@ -55,6 +55,8 @@ context-free syntax
 	Elem = Foreach
 	Elem = Button
 	Elem = Goto
+	Elem = Selection
+	Elem = Fragment
 
 sorts
 
@@ -93,11 +95,11 @@ sorts
 context-free syntax
 
 	Form.Form = <form (<Http>) {<Elem*>}>
-	Button.Create = <create-btn>
-	Button.Edit = <edit-btn>
-	Button.Reset = <reset-btn>
-	Button.Submit = <submit-btn>
-	Button.Delete = <<ID>. delete-btn (<ID>)>
+	Button.CreateBtn = <create-btn>
+	Button.EditBtn = <edit-btn>
+	Button.ResetBtn = <reset-btn>
+	Button.SubmitBtn = <submit-btn>
+	Button.DeleteBtn = <<ID>. delete-btn (<ID>)>
 	Http.Post = <create <ID>>
 	Http.Put = <update <ID>>
 	
@@ -143,7 +145,13 @@ context-free syntax
 	ForeachElem = Form
 	ForeachElem = ListItem
 
+sorts
 
+	Selection
+	
+context-free syntax
+
+	Selection.Selection = <selection (<ID>,<ID>,<Var>) {<ID>}>
 
 
 sorts
@@ -191,10 +199,10 @@ context-free syntax
 	
 	ParaDecl.ParaDecl = <<ID>:<Type>>
 
-//sorts
-//
-//	Exp
-//	
-//context-free syntax
-//
-//	Exp
+sorts
+
+	Fragment
+	
+context-free syntax
+
+	Fragment.Fragment = <template . <ID>(<{ID ","}*>)>

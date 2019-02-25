@@ -1,0 +1,44 @@
+module InitDecl
+
+imports 
+	Common
+	Lexical
+	PageDecl
+	
+sorts
+
+	Init
+	
+context-free syntax
+
+	Init.Init = <init { <{InitStat "\n"}*> }>
+	
+sorts
+
+	InitStat
+	
+context-free syntax
+
+	InitStat = CallMethod
+	InitStat.Assign = <<ID> := <Exp>>
+	
+sorts
+
+	Exp
+	
+context-free syntax
+
+	Exp.ObjExp = <<ID> { <{ Attr "\n"}*> }>
+	
+sorts
+
+	Attr
+	InitVar
+	
+context-free syntax
+	
+	InitVar = <<Var>>
+	InitVar.Obj = <<ID>>
+	
+	Attr.Single = <<ID> := <InitVar>>
+	Attr.Many = <<ID> := [<{ID ","}*>]>
