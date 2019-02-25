@@ -8,6 +8,7 @@ dispatcher student{
 		}
 		
 		body{
+			template.navbar()
 			Student.gotoCreate()
 			table{
 				row{
@@ -33,8 +34,6 @@ dispatcher student{
 						},
 						
 						col{student.gotoEdit(Student),student.delete-btn(Student)}
-//						,
-//						col{gotoAll(Student)}
 					}
 				}
 			}
@@ -141,6 +140,7 @@ dispatcher subject{
 		}
 		
 		body{
+			template.navbar()
 			Subject.gotoCreate()
 			table{
 				row{

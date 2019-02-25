@@ -13,12 +13,10 @@ derive CRUD Student
 derive CRUD Subject
 
 init{
-
 	sub1 := Subject{
 				name := "Math"
 				}
 	Subject.save(sub1)
-	
 	
 	sub2 := Subject{
 				name := "English"
@@ -44,12 +42,10 @@ dispatcher main {
 
 	/index >>
 		page main(){
-//			data{}
 			body{
 				template.navbar()
 			}
 		}
-	
 }
 
 //template pagebar(studentList){

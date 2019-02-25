@@ -208,6 +208,19 @@ rules
 				th:value="${opt.id}" th:text="opt.[prop]"></option>
 		</select>]
 		
+	
+	page-elem:
+		Fragment("pagebar",[input]) ->
+		$[<div th:with="data=${[input]}">
+			<div th:include="/common/pagebar::pageBar"></div>
+		</div>
+		]
+		
+	page-elem:
+		Fragment(name,_) ->
+		$[<div th:include="/common/[name]::[name]"></div>
+		]
+		
 		
 		
 		
